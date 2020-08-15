@@ -15,18 +15,36 @@ import { SocialSharing } from '@ionic-native/social-sharing/ngx';
 export class Tab1Page {
 
   title = "Grocery";
+  items = [];
+  errorMessage: string;
 
-  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public alertCtrl: AlertController, public dataService: GroceriesProviderService, public inputDialogService: InputDialogService, public socialSharing: SocialSharing ) {
 
+  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public alertCtrl: AlertController,
+              public dataService: GroceriesProviderService, public inputDialogService: InputDialogService,
+              public socialSharing: SocialSharing ) {
+
+    dataService.dataChanged$.subscribe((dataChanged: boolean) => {
+    this.loadItems();
+    });
+  }
+
+  ngOnInit() {
+    console.log("Page loading...")
+    this.loadItems();
   }
 
   loadItems() {
-    return this.dataService.getItems();
+    this.dataService.getItems()
+      .subscribe(
+        items => this.items = items,
+        error => this.errorMessage = <any>error
+        );
   }
 
   async removeItem(item, index) {
     console.log("Removing Item - ", item);
-    this.dataService.items.splice(index, 1);
+    //this.dataService.items.splice(index, 1);
+    this.dataService.removeItem(item)
 
     const toast = this.toastCtrl.create({
       message: 'Removing Item - ' + item.name + " ...",
